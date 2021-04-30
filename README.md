@@ -4,8 +4,8 @@
 
 The goal of this PHP test is to take you to space with the 
 [picture of the day by the Nasa](https://apod.nasa.gov/apod/archivepixFull.html). We want to display a page on our 
-website that will show us the current picture of the day (and its description). To achieve that, The Nasa gives us an 
-API to fetch the data  on their server. Unfortunately, This API has a limit of the number of calls we can make. So we 
+website that will show us the current picture of the day (and its description). To achieve that, NASA gives us an 
+API to fetch the data from their server. Unfortunately, This API has a limit on the number of calls we can make. So we 
 will store the images on our side.
 
 Here is an example of the response by the API :
@@ -28,21 +28,21 @@ For now, we only need these informations that will be displayed on our website, 
 - date ;
 - image.
 
-The application will only be accesible by logged in users only. To achieve that, the login process will use Google as a login provider. 
+The application will only be accessible by logged in users. To achieve that, the login process will use Google as a login provider. 
 
 Here are the steps you may want to follow to achieve this challenge :
 
 - **Step 1**: make a CLI command that will be executed each day to fetch the picture of the day ;
 - **Step 2**: make a page to display the picture of the day. If there is no picture (say the picture of the day is a video) we will display the picture of the previous day ;
-- **Step 3**: protect our app, so the picture will only be visible by a logged user. The user will be able to connect with a Google account using the Google as login provider ;
+- **Step 3**: protect our app, so the picture will only be visible by a logged in user. The user will be able to connect with a Google account using Google as login provider ;
 - **Step 4**: make a small documentation explaining what you did, the technologies you used etc.
 
-To fetch pictures from the Nasa API, you need an API Key. It will be sent to you by email.
+To fetch pictures from the NASA API, you need an API key. It will be sent to you by email.
 
-When you finish this challenge, send a link when your repository by mail. 
+When you finish this challenge, send a link to your repository by email. 
 
 ## Stack
 
 The only constraint is to use PHP (use the version you want) and this Symfony project. You will then use any library you want, any database you want.
 
-And must of all, have fun!
+And most of all, have fun!
