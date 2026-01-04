@@ -16,6 +16,17 @@ class PictureRepository extends ServiceEntityRepository
         parent::__construct($registry, Picture::class);
     }
 
+    /* Find the latest image that has the image mediaType */
+    public function findLatestImage() : ?Picture {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.mediaType = :type')
+            ->setParameter('type', 'image')
+            ->orderBy('p.date', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Picture[] Returns an array of Picture objects
     //     */

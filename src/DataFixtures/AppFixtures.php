@@ -18,7 +18,7 @@ class AppFixtures extends Fixture
             $picture->setExplanation("Description de l'image de test numéro $i.");
             $date = new DateTimeImmutable("-$i days");
             $picture->setDate($date);
-            $picture->setMediaType("image");
+            $i <= 1 ? $picture->setMediaType("video") : $picture->setMediaType("image");
 
             $manager->persist($picture);
         }
