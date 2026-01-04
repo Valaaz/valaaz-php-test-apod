@@ -11,6 +11,8 @@
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.6",
         "dragonmantank/cron-expression": "^3.6",
+        "knpuniversity/oauth2-client-bundle": "^2.20",
+        "league/oauth2-google": "^4.1",
         "symfony/dotenv": "*",
         "symfony/http-client": "8.*.*",
         "symfony/messenger": "8.*.*",
