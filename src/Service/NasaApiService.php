@@ -33,7 +33,7 @@ class NasaApiService {
         } catch (TransportExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|DecodingExceptionInterface $e) {
             $this->logger->error($e->getMessage());
             return $this->getFallbackData();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage());
             return $this->getFallbackData();
         }
