@@ -4,10 +4,11 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.2.5",
+        "php": ">=8.0",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "symfony/dotenv": "*",
+        "symfony/http-client": "8.*.*",
         "symfony/yaml": "*"
     },
     "require-dev": {
