@@ -11,6 +11,21 @@
     "psr/log": {
         "version": "1.1.3"
     },
+    "symfony/asset-mapper": {
+        "version": "8.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "6.4",
+            "ref": "5ad1308aa756d58f999ffbe1540d1189f5d7d14a"
+        },
+        "files": [
+            "./assets/app.js",
+            "./assets/styles/app.css",
+            "./config/packages/asset_mapper.yaml",
+            "./importmap.php"
+        ]
+    },
     "symfony/cache": {
         "version": "v5.2.6"
     },
@@ -178,6 +193,18 @@
     },
     "symfony/yaml": {
         "version": "v5.2.5"
+    },
+    "symfonycasts/tailwind-bundle": {
+        "version": "0.12",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "0.8",
+            "ref": "d0bd0276f74de90adfaa4c6cd74cc0caacd77e0a"
+        },
+        "files": [
+            "./config/packages/symfonycasts_tailwind.yaml"
+        ]
     },
     "twig/extra-bundle": {
         "version": "v3.22.2"
