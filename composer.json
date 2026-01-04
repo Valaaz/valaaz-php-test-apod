@@ -9,7 +9,10 @@
         "ext-iconv": "*",
         "symfony/dotenv": "*",
         "symfony/http-client": "8.*.*",
-        "symfony/yaml": "*"
+        "symfony/twig-bundle": "8.*.*",
+        "symfony/yaml": "*",
+        "twig/extra-bundle": "^2.12|^3.0",
+        "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
         "symfony/console": "8.*.*",
