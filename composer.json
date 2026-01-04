@@ -19,6 +19,7 @@
         "symfony/console": "8.*.*",
         "symfony/flex": "2.10",
         "symfony/framework-bundle": "8.*.*",
+        "symfony/maker-bundle": "^1.65",
         "symfony/stopwatch": "*",
         "symfony/web-profiler-bundle": "8.*.*"
     },
