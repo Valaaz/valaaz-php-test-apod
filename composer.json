@@ -7,13 +7,13 @@
         "php": ">=7.2.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "symfony/console": "*",
         "symfony/dotenv": "*",
         "symfony/yaml": "*"
     },
     "require-dev": {
+        "symfony/console": "8.*.*",
         "symfony/flex": "2.10",
-        "symfony/framework-bundle": "7.4",
+        "symfony/framework-bundle": "8.*.*",
         "symfony/stopwatch": "*",
         "symfony/web-profiler-bundle": "7.4"
     },
@@ -60,7 +60,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "7.*.*"
+            "require": "8.*.*"
         }
     }
 }
