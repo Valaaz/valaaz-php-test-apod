@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\Picture;
+use DateTimeImmutable;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -45,5 +48,23 @@ class NasaApiService {
             'media_type' => 'image',
             'is_fallback' => true,
         ];
+    }
+
+    /* Persist picture of the day in local db */
+    public function createPictureFromAPI(array $data) : Picture {
+        $picture = new Picture();
+        $picture->setTitle($data['title']);
+        $picture->setUrl($data['url']);
+
+        try {
+            $picture->setDate(new DateTimeImmutable($data['date']));
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
+            $picture->setDate(new DateTimeImmutable());
+        }
+        $picture->setExplanation($data['explanation']);
+        $picture->setMediaType($data['media_type']);
+
+        return $picture;
     }
 }
