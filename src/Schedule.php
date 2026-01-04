@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Scheduler\DailyFetchMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
+use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule as SymfonySchedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -12,7 +14,8 @@ class Schedule implements ScheduleProviderInterface
 {
     public function __construct(
         private CacheInterface $cache,
-    ) {
+    )
+    {
     }
 
     public function getSchedule(): SymfonySchedule
@@ -22,7 +25,6 @@ class Schedule implements ScheduleProviderInterface
             ->processOnlyLastMissedRun(true) // ensure only last missed task is run
 
             // add your own tasks here
-            // see https://symfony.com/doc/current/scheduler.html#attaching-recurring-messages-to-a-schedule
-        ;
+            ->add(RecurringMessage::cron('0 8 * * *', new DailyFetchMessage()));
     }
 }

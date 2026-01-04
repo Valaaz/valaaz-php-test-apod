@@ -22,8 +22,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class FetchApodCommand extends Command
 {
     public function __construct(
-        private NasaApiService $nasaApiService,
-        private PictureRepository $pictureRepository,
+        private NasaApiService         $nasaApiService,
+        private PictureRepository      $pictureRepository,
         private EntityManagerInterface $entityManager,
     )
     {
@@ -34,8 +34,7 @@ class FetchApodCommand extends Command
     {
         $this
             ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-        ;
+            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -43,30 +42,20 @@ class FetchApodCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Importation de l\'image du jour');
 
-        // Get data (API or Fallback)
         $data = $this->nasaApiService->fetchNasaAPI();
+        $status = $this->nasaApiService->persistPicture($data);
 
-        try {
-            $date = new DateTimeImmutable($data['date'] ?? 'now');
-        } catch (Exception $e) {
-            $date = new DateTimeImmutable('now');
+        switch ($status) {
+            case NasaApiService::STATUS_PERSISTED:
+                $io->success('L\'image du jour ' . $data['title'] . ' a été chargée dans la base de données');
+                break;
+            case NasaApiService::STATUS_ALREADY_EXISTS:
+                $io->success('L\'image du jour ' . $data['title'] . ' est déjà chargée dans la base de données');
+                break;
+            case NasaApiService::STATUS_ERROR:
+                $io->error("Une erreur est survenue lors de la persistance");
+                return Command::FAILURE;
         }
-
-        $existingPicture = $this->pictureRepository->findOneBy(['date' => $date]);
-
-        if (!$existingPicture) {
-            // Transform data to Entity
-            $picture = $this->nasaApiService->createPictureFromAPI($data);
-
-            // Persist
-            $this->entityManager->persist($picture);
-            $this->entityManager->flush();
-
-            $io->success('L\'image du jour ' . $picture->getTitle() . ' a été chargée dans la base de données');
-        } else {
-            $io->success('L\'image du jour ' . $existingPicture->getTitle() . ' est déjà chargée dans la base de données');
-        }
-
 
         return Command::SUCCESS;
     }

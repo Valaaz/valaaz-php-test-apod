@@ -3,7 +3,9 @@
 namespace App\Service;
 
 use App\Entity\Picture;
+use App\Repository\PictureRepository;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Exception\ExceptionInterface;
@@ -14,17 +16,27 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class NasaApiService {
+class NasaApiService
+{
+    public const STATUS_PERSISTED = 'persisted';
+    public const STATUS_ALREADY_EXISTS = 'already_exists';
+    public const STATUS_ERROR = 'error';
+
     public function __construct(
         private HttpClientInterface $client,
-        private string $nasaApiKey,
-        private LoggerInterface $logger,
-    ) {}
+        private string              $nasaApiKey,
+        private LoggerInterface     $logger,
+        private EntityManagerInterface $entityManager,
+        private PictureRepository $pictureRepository
+    )
+    {
+    }
 
     /* Try to retrieve data from API, return raw data if exception */
-    public function fetchNasaAPI(): array {
+    public function fetchNasaAPI(): array
+    {
         try {
-            $response = $this->client->request('GET', 'https://api.nasa.gov/planetary/apod' , [
+            $response = $this->client->request('GET', 'https://api.nasa.gov/planetary/apod', [
                 'query' => ['api_key' => $this->nasaApiKey,],
                 'timeout' => 2.5,
             ]);
@@ -39,7 +51,8 @@ class NasaApiService {
         }
     }
 
-    public function getFallbackData(): array {
+    public function getFallbackData(): array
+    {
         return [
             'title' => 'Simulation : Nébuleuse de la Tarentule',
             'date' => date('Y-m-d'),
@@ -50,8 +63,9 @@ class NasaApiService {
         ];
     }
 
-    /* Persist picture of the day in local db */
-    public function createPictureFromAPI(array $data) : Picture {
+    /* Create picture object */
+    private function createPictureFromAPI(array $data): Picture
+    {
         $picture = new Picture();
         $picture->setTitle($data['title']);
         $picture->setUrl($data['url']);
@@ -66,5 +80,41 @@ class NasaApiService {
         $picture->setMediaType($data['media_type']);
 
         return $picture;
+    }
+
+    /* Persist a picture to database */
+    public function persistPicture(array $data): string
+    {
+        try {
+            $date = $this->safeParseDate($data['date']);
+
+            $existingPicture = $this->pictureRepository->findOneBy(['date' => $date]);
+            if ($existingPicture) {
+                $this->logger->info("L'image du jour " . $date->format('d/m/y') . " est déjà présente dans la base de données");
+                return self::STATUS_ALREADY_EXISTS;
+            }
+
+            // Transform data to Entity
+            $picture = $this->createPictureFromAPI($data);
+
+            // Persist
+            $this->entityManager->persist($picture);
+            $this->entityManager->flush();
+
+            return self::STATUS_PERSISTED;
+        } catch (Exception $e) {
+            $this->logger->error("Erreur de persistance : " . $e->getMessage());
+            return self::STATUS_ERROR;
+        }
+    }
+
+    private function safeParseDate(?string $dateString): DateTimeImmutable
+    {
+        try {
+            return $dateString ? new DateTimeImmutable($dateString) : new DateTimeImmutable();
+        } catch (Exception $e) {
+            $this->logger->error("Date invalide reçue : $dateString");
+            return new DateTimeImmutable();
+        }
     }
 }
