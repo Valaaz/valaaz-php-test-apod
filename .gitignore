@@ -10,7 +10,6 @@
 ###< symfony/framework-bundle ###
 
 /.idea
-.env
 
 ###> symfony/asset-mapper ###
 /public/assets/
