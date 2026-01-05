@@ -5,6 +5,7 @@
 ### Back
 
 - PHP : 8.5.1
+- Composer : 2.9.3
 - Symfony : 8.0.3
 - Doctrine ORM : 3.6
 - HttpClient : 8.0.3
@@ -46,13 +47,37 @@ Récupérez également la clé API de la NASA : https://api.nasa.gov/.
    GOOGLE_OAUTH_ID=YOUR_KEY
    GOOGLE_OAUTH_SECRET=YOUR_KEY
    ```
-2. `composer install`
-3. `npm install` (Pour DaisyUI)
-4. `php bin/console tailwind:build` Pour compiler le CSS de Tailwind
-5. `php bin/console doctrine:database:create`
-6. `php bin/console doctrine:migrations:migrate`
-7. `php bin/console app:fetch-apod` Va remplir la base de données avec l'image du jour
-8. `symfony serve`
+3.
+   ```
+   composer install
+   ```
+3. Pour DaisyUI
+   ```
+   npm install`
+   ```
+4. Pour compiler le CSS de Tailwind
+   ```
+   php bin/console tailwind:build` 
+   ```
+5. 
+   ```
+   php bin/console doctrine:migrations:migrate
+   ```
+
+   Si la commande échoue, faites celle-là d'abord 
+   
+   ```
+   php bin/console doctrine:database:create
+   ```
+
+6. Rempli la base de données avec l'image du jour
+   ```
+   php bin/console app:fetch-apod
+   ```
+7. 
+   ```
+   symfony serve
+   ```
 
 ### Problèmes éventuels
 
@@ -105,6 +130,17 @@ Après s'être connecté, il sera renvoyé sur la page de l'image du jour où il
 La déconnexion renvoie vers la page de connexion.
 
 > J'ai activé l'option qui garde la connexion de l'utilisateur même s'il quitte la page.
+
+### Bonus
+
+J'ai utilisé Symfony Scheduler pour créer une tâche planifiée qui va lancer la commande de fetch chaque jour à une heure précise.
+
+J'ai testé avec 15 secondes d'intervalle et cela fonctionne. J'ai configuré la tâche pour que la commande soit lancée quotidiennement à 8h donc en théorie, il suffirait de lancer une fois cette tâche et chaque jour l'image du jour serait récupérée sans refaire la commande manuellement.
+
+Pour lancer la tâche planifiée :
+```
+php bin/console messenger:consume scheduler_default
+```
 
 # Sujet
 
