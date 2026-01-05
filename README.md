@@ -1,5 +1,113 @@
 # PHP Technical Test
 
+## Technologies utilisées
+
+### Back
+
+- PHP : 8.5.1
+- Symfony : 8.0.3
+- Doctrine ORM : 3.6
+- HttpClient : 8.0.3
+- Symfony Scheduler : 8.0.0
+
+### Front
+
+- Twig
+- Tailwind CSS : 4.1.18
+- DaisyUI : 5.5.14
+
+### Authentification
+
+- league/oauth2-google : 4.1.0
+- knpuniversity/oauth2-client-bundle : 2.20.1
+
+### Base de données
+
+- SQLite : 3.42.0
+
+## Installation
+
+### Prérequis
+
+1. Allez sur https://console.cloud.google.com/ et créez un nouveau projet.
+2. Si besoin, configurez l'écran de consentement.
+3. Créez un nouveau client OAuth de type Application Web.
+   - Dans **Origines JavaScript autorisées** mettez `http://localhost:8000`.
+   - Dans **URI de redirection autorisés** mettez `http://localhost:8000/oauth/check/google` et `http://127.0.0.1:8000/oauth/check/google`.
+4. Et récupérez vos identifiants `client_id` et `client_secret`.
+
+Récupérez également la clé API de la NASA : https://api.nasa.gov/.
+
+### Configuration
+
+1. Créez le fichier `.env.local` et déplacez les variables du fichier `.env` dedans puis mettez vos clés :
+    ```
+   NASA_API_KEY=YOUR_KEY
+   GOOGLE_OAUTH_ID=YOUR_KEY
+   GOOGLE_OAUTH_SECRET=YOUR_KEY
+   ```
+2. `composer install`
+3. `npm install` (Pour DaisyUI)
+4. `php bin/console tailwind:build` Pour compiler le CSS de Tailwind
+5. `php bin/console doctrine:database:create`
+6. `php bin/console doctrine:migrations:migrate`
+7. `php bin/console app:fetch-apod` Va remplir la base de données avec l'image du jour
+8. `symfony serve`
+
+### Problèmes éventuels
+
+**SQLite**
+
+Vu que le projet utilise SQLite, assurez-vous que ces deux lignes soient activées dans votre fichier `php.ini` :
+- `extension=pdo_sqlite`
+- `extension=sqlite3`
+
+**Google OAuth**
+
+Google peut poser problème au niveau des certificats. Dans ce cas, allez sur https://curl.se/ca/cacert.pem et stockez le certificat sur votre ordinateur.
+Dans `php.ini` activez ces lignes si besoin et renseignez le chemin :
+
+```
+curl.cainfo = "votre_chemin\cacert.pem"
+openssl.cafile = "votre_chemin\cacert.pem"
+```
+
+## Déroulement
+
+### 1. Migration
+
+J'ai d'abord migré Symfony de la 5.4 vers la 8 en migrant une version majeure à la fois (j'ai testé de faire une migration d'un coup mais j'avais des erreurs).
+
+### 2. Gestion de l'API
+
+Ensuite, j'ai commencé par la connexion à l'API avec le but d'afficher l'image du jour dans une page. J'ai créé un Service en utilisant `HttpClient`, un Controller et une Vue.
+Malheureusement, durant mon développement l'API de la NASA était en panne (elle l'est toujours à ce jour).
+Cela m'a néanmoins permis de gérer les exceptions dans le service de l'API.
+
+### 3. Base de données et jeu de données
+
+J'ai ensuite créé des données de secours pour pouvoir continuer en attendant que ce soit réparé.
+D'abord des données créées à la main puis j'ai créé une base de données `SQLite` en utilisant les `Fixtures` pour remplir cette base.
+Par la suite, j'ai créé la commande qui fetch l'image du jour et la persiste dans la base de données en utilisant le service développé précédemment.
+
+> Le temps que l'API refonctionne, si la requête échoue le fetch renvoie un jeu de données de secours pour simuler la réponse.
+
+### 4. Gestion du type d'image
+
+Par la suite, avec ma base de données et les Fixtures, j'ai géré le cas où l'image du jour n'est pas une image.
+Pour cela, j'ai une fonction dans `PictureRepository` qui renvoie l'image la plus récente en faisant une requête qui trie les dates et vérifie que le type est bien image.
+
+### 5. Sécurisation et authentification
+
+La dernière étape était l'implémentation d'une sécurisation du site avec la nécessité de se connecter en utilisant Google.
+Après avoir configuré les deux librairies `league/oauth2-google` et `knpuniversity/oauth2-client-bundle`, j'ai fait le choix de rediriger tout utilisateur non connecté sur la page de connexion.
+Après s'être connecté, il sera renvoyé sur la page de l'image du jour où il aura la possibilité de se déconnecter dans la barre de navigation.
+La déconnexion renvoie vers la page de connexion.
+
+> J'ai activé l'option qui garde la connexion de l'utilisateur même s'il quitte la page.
+
+# Sujet
+
 ## Instructions
 
 The goal of this PHP test is to take you to space with the 
