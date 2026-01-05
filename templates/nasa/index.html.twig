@@ -3,11 +3,11 @@
 {% block title %}Image du jour - NASA{% endblock %}
 
 {% block body %}
-    <div class="flex flex-col items-center gap-2 pt-2 pb-16">
+    <div class="flex flex-col items-center gap-4 pt-2 pb-16">
         {% if picture %}
             <h1 class="font-bold text-4xl">{{ picture.title }}</h1>
 
-            <div class="w-[60%]">
+            <div class="w-[80%] md:w-[50%]">
                 <img class="rounded-xl" src="{{ picture.url }}" alt="{{ picture.title }}">
                 <p class="underline">Date : {{ picture.date|date('d/m/Y') }}</p>
                 <p>{{ picture.explanation }}</p>
