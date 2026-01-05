@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Se connecter avec Google{% endblock %}
+
+{% block body %}
+    <div class="h-svh flex justify-center items-center">
+        <div class="card shadow-sm w-[40%] h-[30%] p-4 text-center">
+            <h1 class="h3 mb-4">Veuillez vous connecter pour voir l'image du jour</h1>
+
+            <a href="{{ path('auth_oauth_connect') }}" class="inline-flex align-items-center justify-content-center gap-2 px-6 py-2 border border-gray-500 rounded-2xl">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 20px;">
+                Continuer avec Google
+            </a>
+        </div>
+    </div>
+{% endblock %}
