@@ -33,8 +33,9 @@
 1. Allez sur https://console.cloud.google.com/ et créez un nouveau projet.
 2. Si besoin, configurez l'écran de consentement.
 3. Créez un nouveau client OAuth de type Application Web.
-   - Dans **Origines JavaScript autorisées** mettez `http://localhost:8000`.
-   - Dans **URI de redirection autorisés** mettez `http://localhost:8000/oauth/check/google` et `http://127.0.0.1:8000/oauth/check/google`.
+    - Dans **Origines JavaScript autorisées** mettez `http://localhost:8000`.
+    - Dans **URI de redirection autorisés** mettez `http://localhost:8000/oauth/check/google` et
+      `http://127.0.0.1:8000/oauth/check/google`.
 4. Et récupérez vos identifiants `client_id` et `client_secret`.
 
 Récupérez également la clé API de la NASA : https://api.nasa.gov/.
@@ -48,48 +49,54 @@ Récupérez également la clé API de la NASA : https://api.nasa.gov/.
    GOOGLE_OAUTH_SECRET=YOUR_KEY
    ```
 3.
-   ```
-   composer install
-   ```
+
+```
+composer install
+```
+
 3. Pour DaisyUI
    ```
-   npm install`
+   npm install
    ```
 4. Pour compiler le CSS de Tailwind
    ```
-   php bin/console tailwind:build` 
+   php bin/console tailwind:build
    ```
-5. 
-   ```
-   php bin/console doctrine:migrations:migrate
-   ```
+5.
 
-   Si la commande échoue, faites celle-là d'abord 
-   
-   ```
-   php bin/console doctrine:database:create
-   ```
+```
+php bin/console doctrine:migrations:migrate
+```
+
+Si la commande échoue, faites celle-là d'abord
+
+```
+php bin/console doctrine:database:create
+```
 
 6. Rempli la base de données avec l'image du jour
    ```
    php bin/console app:fetch-apod
    ```
-7. 
-   ```
-   symfony serve
-   ```
+7.
+
+```
+symfony serve
+```
 
 ### Problèmes éventuels
 
 **SQLite**
 
 Vu que le projet utilise SQLite, assurez-vous que ces deux lignes soient activées dans votre fichier `php.ini` :
+
 - `extension=pdo_sqlite`
 - `extension=sqlite3`
 
 **Google OAuth**
 
-Google peut poser problème au niveau des certificats. Dans ce cas, allez sur https://curl.se/ca/cacert.pem et stockez le certificat sur votre ordinateur.
+Google peut poser problème au niveau des certificats. Dans ce cas, allez sur https://curl.se/ca/cacert.pem et stockez le
+certificat sur votre ordinateur.
 Dans `php.ini` activez ces lignes si besoin et renseignez le chemin :
 
 ```
@@ -99,45 +106,61 @@ openssl.cafile = "votre_chemin\cacert.pem"
 
 ## Déroulement
 
+> ⚠️ ATTENTION : À ce jour, l'API de la NASA est en panne. J'utilise une API de secours et si cette API échoue
+> également,
+> je retourne des données brutes pour qu'une image puisse s'afficher.
+
 ### 1. Migration
 
-J'ai d'abord migré Symfony de la 5.4 vers la 8 en migrant une version majeure à la fois (j'ai testé de faire une migration d'un coup mais j'avais des erreurs).
+J'ai d'abord migré Symfony de la 5.4 vers la 8 en migrant une version majeure à la fois (j'ai testé de faire une
+migration d'un coup mais j'avais des erreurs).
 
 ### 2. Gestion de l'API
 
-Ensuite, j'ai commencé par la connexion à l'API avec le but d'afficher l'image du jour dans une page. J'ai créé un Service en utilisant `HttpClient`, un Controller et une Vue.
+Ensuite, j'ai commencé par la connexion à l'API avec le but d'afficher l'image du jour dans une page. J'ai créé un
+Service en utilisant `HttpClient`, un Controller et une Vue.
 Malheureusement, durant mon développement l'API de la NASA était en panne (elle l'est toujours à ce jour).
 Cela m'a néanmoins permis de gérer les exceptions dans le service de l'API.
 
 ### 3. Base de données et jeu de données
 
 J'ai ensuite créé des données de secours pour pouvoir continuer en attendant que ce soit réparé.
-D'abord des données créées à la main puis j'ai créé une base de données `SQLite` en utilisant les `Fixtures` pour remplir cette base.
-Par la suite, j'ai créé la commande qui fetch l'image du jour et la persiste dans la base de données en utilisant le service développé précédemment.
+D'abord des données créées à la main puis j'ai créé une base de données `SQLite` en utilisant les `Fixtures` pour
+remplir cette base.
+Par la suite, j'ai créé la commande qui fetch l'image du jour et la persiste dans la base de données en utilisant le
+service développé précédemment.
 
-> Le temps que l'API refonctionne, si la requête échoue le fetch renvoie un jeu de données de secours pour simuler la réponse.
+> J'ai rajouté une API de secours avant de terminer le projet
 
 ### 4. Gestion du type d'image
 
 Par la suite, avec ma base de données et les Fixtures, j'ai géré le cas où l'image du jour n'est pas une image.
-Pour cela, j'ai une fonction dans `PictureRepository` qui renvoie l'image la plus récente en faisant une requête qui trie les dates et vérifie que le type est bien image.
+Pour cela, j'ai une fonction dans `PictureRepository` qui renvoie l'image la plus récente en faisant une requête qui
+trie les dates et vérifie que le type est bien `image`.
 
 ### 5. Sécurisation et authentification
 
-La dernière étape était l'implémentation d'une sécurisation du site avec la nécessité de se connecter en utilisant Google.
-Après avoir configuré les deux librairies `league/oauth2-google` et `knpuniversity/oauth2-client-bundle`, j'ai fait le choix de rediriger tout utilisateur non connecté sur la page de connexion.
-Après s'être connecté, il sera renvoyé sur la page de l'image du jour où il aura la possibilité de se déconnecter dans la barre de navigation.
+La dernière étape était l'implémentation d'une sécurisation du site avec la nécessité de se connecter en utilisant
+Google.
+Après avoir configuré les deux librairies `league/oauth2-google` et `knpuniversity/oauth2-client-bundle`, j'ai fait le
+choix de rediriger tout utilisateur non connecté sur la page de connexion.
+Après s'être connecté, il sera renvoyé sur la page de l'image du jour où il aura la possibilité de se déconnecter dans
+la barre de navigation.
 La déconnexion renvoie vers la page de connexion.
 
 > J'ai activé l'option qui garde la connexion de l'utilisateur même s'il quitte la page.
 
 ### Bonus
 
-J'ai utilisé Symfony Scheduler pour créer une tâche planifiée qui va lancer la commande de fetch chaque jour à une heure précise.
+J'ai utilisé Symfony Scheduler pour créer une tâche planifiée qui va lancer la commande de fetch chaque jour à une heure
+précise.
 
-J'ai testé avec 15 secondes d'intervalle et cela fonctionne. J'ai configuré la tâche pour que la commande soit lancée quotidiennement à 8h donc en théorie, il suffirait de lancer une fois cette tâche et chaque jour l'image du jour serait récupérée sans refaire la commande manuellement.
+J'ai testé avec 15 secondes d'intervalle et cela fonctionne. J'ai configuré la tâche pour que la commande soit lancée
+quotidiennement à 8h donc en théorie, il suffirait de lancer une fois cette tâche et chaque jour l'image du jour serait
+récupérée sans refaire la commande manuellement.
 
 Pour lancer la tâche planifiée :
+
 ```
 php bin/console messenger:consume scheduler_default
 ```
@@ -146,10 +169,10 @@ php bin/console messenger:consume scheduler_default
 
 ## Instructions
 
-The goal of this PHP test is to take you to space with the 
-[picture of the day by the Nasa](https://apod.nasa.gov/apod/archivepixFull.html). We want to display a page on our 
-website that will show us the current picture of the day (and its description). To achieve that, NASA gives us an 
-API to fetch the data from their server. Unfortunately, This API has a limit on the number of calls we can make. So we 
+The goal of this PHP test is to take you to space with the
+[picture of the day by the Nasa](https://apod.nasa.gov/apod/archivepixFull.html). We want to display a page on our
+website that will show us the current picture of the day (and its description). To achieve that, NASA gives us an
+API to fetch the data from their server. Unfortunately, This API has a limit on the number of calls we can make. So we
 will store the images on our side.
 
 Here is an example of the response by the API :
@@ -165,28 +188,33 @@ Here is an example of the response by the API :
   "url": "https://apod.nasa.gov/apod/image/2102/PIA02471_800.jpg"
 }
 ```
-For now, we only need these informations that will be displayed on our website, and thus will be saved on our database : 
+
+For now, we only need these informations that will be displayed on our website, and thus will be saved on our database :
 
 - title ;
 - explanation ;
 - date ;
 - image.
 
-The application will only be accessible by logged in users. To achieve that, the login process will use Google as a login provider. 
+The application will only be accessible by logged in users. To achieve that, the login process will use Google as a
+login provider.
 
 Here are the steps you may want to follow to achieve this challenge :
 
 - **Step 1**: make a CLI command that will be executed each day to fetch the picture of the day ;
-- **Step 2**: make a page to display the picture of the day. If there is no picture (say the picture of the day is a video) we will display the picture of the previous day ;
-- **Step 3**: protect our app, so the picture will only be visible by a logged in user. The user will be able to connect with a Google account using Google as login provider ;
+- **Step 2**: make a page to display the picture of the day. If there is no picture (say the picture of the day is a
+  video) we will display the picture of the previous day ;
+- **Step 3**: protect our app, so the picture will only be visible by a logged in user. The user will be able to connect
+  with a Google account using Google as login provider ;
 - **Step 4**: make a small documentation explaining what you did, the technologies you used etc.
 
 To fetch pictures from the NASA API, you need an API key. It will be sent to you by email.
 
-When you finish this challenge, send a link to your repository by email. 
+When you finish this challenge, send a link to your repository by email.
 
 ## Stack
 
-The only constraint is to use PHP (use the version you want) and this Symfony project. You will then use any library you want, any database you want.
+The only constraint is to use PHP (use the version you want) and this Symfony project. You will then use any library you
+want, any database you want.
 
 And most of all, have fun!
