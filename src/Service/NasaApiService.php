@@ -23,11 +23,10 @@ class NasaApiService
     public const STATUS_ERROR = 'error';
 
     public function __construct(
-        private HttpClientInterface $client,
-        private string              $nasaApiKey,
-        private LoggerInterface     $logger,
-        private EntityManagerInterface $entityManager,
-        private PictureRepository $pictureRepository
+        private readonly HttpClientInterface $client,
+        private readonly string              $nasaApiKey,
+        private readonly LoggerInterface     $logger,
+        private readonly PictureRepository $pictureRepository
     )
     {
     }

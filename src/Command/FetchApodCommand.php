@@ -22,9 +22,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class FetchApodCommand extends Command
 {
     public function __construct(
-        private NasaApiService         $nasaApiService,
-        private PictureRepository      $pictureRepository,
-        private EntityManagerInterface $entityManager,
+        private readonly NasaApiService $nasaApiService,
     )
     {
         parent::__construct();

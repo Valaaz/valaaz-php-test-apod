@@ -23,10 +23,10 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationEntryPointInterface
 {
     public function __construct(
-        private ClientRegistry         $clientRegistry,
-        private UserRepository         $userRepository,
-        private EntityManagerInterface $entityManager,
-        private RouterInterface        $router
+        private readonly ClientRegistry         $clientRegistry,
+        private readonly UserRepository         $userRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RouterInterface $router
     )
     {
     }
