@@ -4,13 +4,12 @@ namespace App\Repository;
 
 use App\Entity\Picture;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Picture>
  */
-class PictureRepository extends ServiceEntityRepository
+class PictureRepository extends AbstractRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -18,7 +17,8 @@ class PictureRepository extends ServiceEntityRepository
     }
 
     /* Find the latest image that has the image mediaType */
-    public function findLatestImage() : ?Picture {
+    public function findLatestImage(): ?Picture
+    {
         return $this->createQueryBuilder('p')
             ->andWhere('p.mediaType = :type')
             ->setParameter('type', 'image')
@@ -26,12 +26,5 @@ class PictureRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
-    }
-
-    public function persist(Picture $picture, bool $flush = false) : void {
-        $this->getEntityManager()->persist($picture);
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
     }
 }
