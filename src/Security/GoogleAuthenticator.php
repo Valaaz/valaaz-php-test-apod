@@ -38,6 +38,7 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
     {
         $client = $this->clientRegistry->getClient('google');
         $accessToken = $this->fetchAccessToken($client);
+
         $googleUser = $client->fetchUserFromToken($accessToken);
 
         $user = $this->userRepository->findOneBy(['googleId' => $googleUser->getId()]);
