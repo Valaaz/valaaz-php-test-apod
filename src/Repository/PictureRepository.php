@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Picture;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -25,5 +26,12 @@ class PictureRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function persist(Picture $picture, bool $flush = false) : void {
+        $this->getEntityManager()->persist($picture);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

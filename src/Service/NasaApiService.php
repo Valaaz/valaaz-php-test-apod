@@ -98,8 +98,7 @@ class NasaApiService
             $picture = $this->createPictureFromAPI($data);
 
             // Persist
-            $this->entityManager->persist($picture);
-            $this->entityManager->flush();
+            $this->pictureRepository->persist($picture, true);
 
             return self::STATUS_PERSISTED;
         } catch (Exception $e) {
