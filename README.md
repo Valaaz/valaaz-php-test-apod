@@ -8,6 +8,7 @@
 - Composer : 2.9.3
 - Symfony : 8.0.3
 - Doctrine ORM : 3.6
+- Fixture : 4.3.1
 - HttpClient : 8.0.3
 - Symfony Scheduler : 8.0.0
 
@@ -48,41 +49,41 @@ Récupérez également la clé API de la NASA : https://api.nasa.gov/.
    GOOGLE_OAUTH_ID=YOUR_KEY
    GOOGLE_OAUTH_SECRET=YOUR_KEY
    ```
-3.
 
-```
-composer install
-```
+2. Installer les dépendances
+   ```
+   composer install
+   ```
 
-3. Pour DaisyUI
+3. Installer DaisyUI
    ```
    npm install
    ```
-4. Pour compiler le CSS de Tailwind
+
+4. Compiler le CSS de Tailwind
    ```
    php bin/console tailwind:build
    ```
-5.
 
-```
-php bin/console doctrine:migrations:migrate
-```
+5. Exécuter les migrations
+   ```
+   php bin/console doctrine:migrations:migrate
+   ```
 
-Si la commande échoue, faites celle-là d'abord
+   Si la commande échoue, faites celle-là d'abord
+   ```
+   php bin/console doctrine:database:create
+   ```
 
-```
-php bin/console doctrine:database:create
-```
-
-6. Rempli la base de données avec l'image du jour
+6. Remplir la base de données avec l'image du jour
    ```
    php bin/console app:fetch-apod
    ```
-7.
 
-```
-symfony serve
-```
+7. Lancer l'application
+   ```
+   symfony serve
+   ```
 
 ### Problèmes éventuels
 
