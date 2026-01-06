@@ -5,16 +5,10 @@ namespace App\Service;
 use App\Entity\Picture;
 use App\Repository\PictureRepository;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Yaml\Exception\ExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Throwable;
 
 class NasaApiService
 {
@@ -22,31 +16,47 @@ class NasaApiService
     public const STATUS_ALREADY_EXISTS = 'already_exists';
     public const STATUS_ERROR = 'error';
 
+    private bool $isLastFetchFromBackup = false;
+
     public function __construct(
         private readonly HttpClientInterface $client,
         private readonly string              $nasaApiKey,
         private readonly LoggerInterface     $logger,
-        private readonly PictureRepository $pictureRepository
+        private readonly PictureRepository   $pictureRepository
     )
     {
     }
 
-    /* Try to retrieve data from API, return raw data if exception */
+    /* Try to retrieve data from APIs, return raw data if exception */
     public function fetchNasaAPI(): array
     {
+        // Try NASA API
         try {
             $response = $this->client->request('GET', 'https://api.nasa.gov/planetary/apod', [
                 'query' => ['api_key' => $this->nasaApiKey,],
                 'timeout' => 2.5,
             ]);
 
+            $this->isLastFetchFromBackup = false;
+
             return $response->toArray();
-        } catch (TransportExceptionInterface|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|DecodingExceptionInterface $e) {
+        } catch (Throwable $e) {
             $this->logger->error($e->getMessage());
-            return $this->getFallbackData();
-        } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
-            return $this->getFallbackData();
+
+            // Try peapix API
+            try {
+                $response = $this->client->request('GET', 'https://peapix.com/bing/feed?country=fr&n=1');
+                $this->isLastFetchFromBackup = true;
+
+                $data = $response->toArray();
+                return $data[0] ?? $data;
+            } catch (Throwable $e) {
+                // If all APIs fail, return raw data
+                $this->logger->error($e->getMessage());
+                $this->logger->error("Toutes les API ont échouées. Envoi des données brutes de secours.");
+                $this->isLastFetchFromBackup = false; // False because my raw backup data have the same structure as NASA API
+                return $this->getFallbackData();
+            }
         }
     }
 
@@ -81,6 +91,25 @@ class NasaApiService
         return $picture;
     }
 
+    /* Create picture object from backup API */
+    private function createPictureFromBackupAPI(array $data): Picture
+    {
+        $picture = new Picture();
+        $picture->setTitle($data['title']);
+        $picture->setUrl($data['imageUrl']);
+
+        try {
+            $picture->setDate(new DateTimeImmutable($data['date']));
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
+            $picture->setDate(new DateTimeImmutable());
+        }
+        $picture->setExplanation('Aucune description fournie');
+        $picture->setMediaType('image');
+
+        return $picture;
+    }
+
     /* Persist a picture to database */
     public function persistPicture(array $data): string
     {
@@ -94,7 +123,11 @@ class NasaApiService
             }
 
             // Transform data to Entity
-            $picture = $this->createPictureFromAPI($data);
+            if (!$this->isLastFetchFromBackup) {
+                $picture = $this->createPictureFromAPI($data);
+            } else {
+                $picture = $this->createPictureFromBackupAPI($data);
+            }
 
             // Persist
             $this->pictureRepository->persist($picture, true);
